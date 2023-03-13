@@ -1,12 +1,12 @@
 class UsersController < ApplicationController
-  before_action :authorize, only: [:show, :update]
-  before_action :set_user, only: [:show, :update]
+  before_action :authorize, only: [:show, :update, :destroy], dependent: :destroy  #delete khong can cung dc  #dependent: :destroy  <dùng để huỷ luôn tasks khi users bị huỷ>
+  before_action :set_user, only: [:show, :update, :destroy]   #delete khong can cung dc
    
   # LIST: cái này có thể dùng cho admin về sau, pj này ko cần, để đây thôi =))
-  # def index
-  #   @users = User.all
-  #   render json: @users
-  # end
+  def index
+    @users = User.all
+    render json: @users
+  end
 
   # SHOW INFO (GET /users/1) 
   def show
@@ -48,6 +48,16 @@ class UsersController < ApplicationController
       render json: { error: 'Invalid!!' }, status: 422 #:unprocessable_entity
     end
   end
+
+  #DELETE   #pj này ko dùng đến delete, để test thôi
+  def destroy
+    if @user.destroy
+      render json: { message: "Deleted user successfully." }, status: 200
+    else
+      render json: @user.errors, status: 422
+    end
+  end
+
 
   private
   def user_params
