@@ -4,7 +4,8 @@ class TasksController < ApplicationController
 
   # LIST TASKS (GET: /tasks)
   def index
-    @tasks = @user.tasks.all
+    # @tasks = @user.tasks.all
+    @tasks = @user.tasks.all.limit(params[:limit]).offset(params[:offset]) #phân trang
     render json: @tasks
   end
 
