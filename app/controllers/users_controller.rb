@@ -18,10 +18,22 @@ class UsersController < ApplicationController
 
   # UPDATE (PATCH/PUT /users/1)
   def update
-    if @user.update(user_params_u)
-      render json: @user
+    # if @user.update(user_params_u)
+    #   render json: @user, , status: 200
+    # else
+    #   render json: @user.errors, status: 422
+    # end
+
+    # check password đã nếu confirm mới cho update nhé
+    if @user && @user.authenticate(user_params[:password])
+      if @user.update(nickname: params['user']['nickname'], password: params['user']['password_n'])
+        render json: @user, status: 200
+        # binding.pry
+      else
+        render json: @user.errors, status: 422
+      end
     else
-      render json: @user.errors, status: 422
+      render json: { error: 'Invalid password!!' }, status: 422 # :unprocessable_entity
     end
   end
 
@@ -67,9 +79,9 @@ class UsersController < ApplicationController
     params.require(:user).permit(:nickname, :password, :email)
   end
 
-  def user_params_u
-    params.require(:user).permit(:nickname, :password)
-  end
+  # def user_params_u
+  #   params.require(:user).permit(:nickname, :password)
+  # end
 
   def set_user
     @user = User.find(params[:id])
