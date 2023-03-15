@@ -1,15 +1,17 @@
 class UsersController < ApplicationController
-  before_action :authorize, only: [:show, :update, :destroy], dependent: :destroy  #delete khong can cung dc  #dependent: :destroy  <dùng để huỷ luôn tasks khi users bị huỷ>
-  before_action :set_user, only: [:show, :update, :destroy]   #delete khong can cung dc
-   
+  before_action :authorize, only: %i[show update destroy], dependent: :destroy  # delete khong can cung dc  #dependent: :destroy  <dùng để huỷ luôn tasks khi users bị huỷ>
+  before_action :set_user, only: %i[show update destroy] # delete khong can cung dc
+
   # LIST: cái này có thể dùng cho admin về sau, pj này ko cần, để đây thôi =))
   def index
     # @users = User.all
-    @users = User.limit(params[:limit]).offset(params[:offset])  #phân trang
-    render json: {users: @users}
+
+    @users = User.ransack(params[:q]).result # ransack
+    # @users = User.limit(params[:limit]).offset(params[:offset]) # phân trang
+    render json: { users: @users }
   end
 
-  # SHOW INFO (GET /users/1) 
+  # SHOW INFO (GET /users/1)
   def show
     render json: @user
   end
@@ -27,8 +29,8 @@ class UsersController < ApplicationController
   def create
     @user = User.create(user_params)
     if @user.valid?
-      token = encode_token({ user_id: @user.id})
-      render json: { user: @user, token: token }, status: 200 
+      token = encode_token({ user_id: @user.id })
+      render json: { user: @user, token: token }, status: 200
     else
       render json: @user.errors, status: 422
     end
@@ -36,31 +38,31 @@ class UsersController < ApplicationController
 
   # LOGIN
   def login
-    if User.find_by(nickname: user_params[:nickname]) != nil
-      @user = User.find_by(nickname: user_params[:nickname])
-    else
-      @user = User.find_by(email: user_params[:email])
-    end
+    @user = if User.find_by(nickname: user_params[:nickname]) != nil
+              User.find_by(nickname: user_params[:nickname])
+            else
+              User.find_by(email: user_params[:email])
+            end
 
     if @user && @user.authenticate(user_params[:password])
       token = encode_token({ user_id: @user.id })
       render json: { user: @user, token: token }, status: 200
     else
-      render json: { error: 'Invalid!!' }, status: 422 #:unprocessable_entity
+      render json: { error: 'Invalid!!' }, status: 422 # :unprocessable_entity
     end
   end
 
-  #DELETE   #pj này ko dùng đến delete, để test thôi
+  # DELETE   #pj này ko dùng đến delete, để test thôi
   def destroy
     if @user.destroy
-      render json: { message: "Deleted user successfully." }, status: 200
+      render json: { message: 'Deleted user successfully.' }, status: 200
     else
       render json: @user.errors, status: 422
     end
   end
 
-
   private
+
   def user_params
     params.require(:user).permit(:nickname, :password, :email)
   end
