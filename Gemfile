@@ -44,3 +44,6 @@ gem 'jwt'
 
 gem 'active_model_serializers'
 
+#search
+gem 'ransack'
+

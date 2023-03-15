@@ -1,11 +1,12 @@
 class TasksController < ApplicationController
   before_action :authorize
-  before_action :set_task, only: [:show, :update, :destroy]
+  before_action :set_task, only: %i[show update destroy]
 
   # LIST TASKS (GET: /tasks)
   def index
     # @tasks = @user.tasks.all
-    @tasks = @user.tasks.all.limit(params[:limit]).offset(params[:offset]) #phân trang
+    # @tasks = @user.tasks.all.limit(params[:limit]).offset(params[:offset]) # chỉ phân trang
+    @tasks = @user.tasks.ransack(params[:q]).result.limit(params[:limit]).offset(params[:offset]) # phân trang & search
     render json: @tasks
   end
 
@@ -37,18 +38,19 @@ class TasksController < ApplicationController
   # DELETE (DELETE: /tasks/1)
   def destroy
     if @task.destroy
-      render json: { message: "Delete successful." }, status: 200
+      render json: { message: 'Delete successful.' }, status: 200
     else
       render json: @task.errors, status: 422
     end
   end
 
   private
-    def set_task
-      @task = @user.tasks.find(params[:id])
-    end
 
-    def task_params
-      params.require(:task).permit(:title, :descrip, :done, :deadline)
-    end
+  def set_task
+    @task = @user.tasks.find(params[:id])
+  end
+
+  def task_params
+    params.require(:task).permit(:title, :descrip, :done, :deadline)
+  end
 end
