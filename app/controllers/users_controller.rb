@@ -4,8 +4,9 @@ class UsersController < ApplicationController
    
   # LIST: cái này có thể dùng cho admin về sau, pj này ko cần, để đây thôi =))
   def index
-    @users = User.all
-    render json: @users
+    # @users = User.all
+    @users = User.limit(params[:limit]).offset(params[:offset])  #phân trang
+    render json: {users: @users}
   end
 
   # SHOW INFO (GET /users/1) 
