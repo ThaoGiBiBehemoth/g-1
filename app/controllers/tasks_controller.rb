@@ -7,7 +7,7 @@ class TasksController < ApplicationController
   def index
     # @tasks = @user.tasks.all
     # pagy, tasks = pagy(@user.tasks.all)
-    pagy, tasks = pagy(@user.tasks.ransack(params[:q]).result) # search trc r phân trang
+    pagy, tasks = pagy(@user.tasks.ransack(params[:q]).result, items: 10) # search trc r phân trang
     # binding.pry
     # @tasks = @user.tasks.all.limit(params[:limit]).offset(params[:offset]) # chỉ phân trang kiểu hàn lâm
     # @tasks = @user.tasks.ransack(params[:q]).result.limit(params[:limit]).offset(params[:offset]) # phân trang kiểu hàn lâm & search
